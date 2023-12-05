@@ -1,4 +1,5 @@
 import { LOGIN_USER, REGISTER_USER } from "@/graphql/mutations";
+import { setAccessToken } from "@/utils/accessToken";
 
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +31,7 @@ export const useAuthentication = () => {
       const response = await loginUser({ variables: { email, password } });
 
       if (response && response.data) {
-        localStorage.setItem("token", response.data.login.accessToken);
+        setAccessToken(response.data.login.accessToken);
       }
 
       navigate("/");

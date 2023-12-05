@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Router } from "./router/router";
+import { setAccessToken } from "./utils/accessToken";
 
 export const App = () => {
   const [loading, setLoading] = useState(true);
@@ -10,9 +11,8 @@ export const App = () => {
       credentials: "include",
     }).then(async (x) => {
       const { accessToken } = await x.json();
-
-      localStorage.setItem("token", accessToken);
-
+      console.log(accessToken);
+      setAccessToken(accessToken);
       setLoading(false);
     });
   }, []);
