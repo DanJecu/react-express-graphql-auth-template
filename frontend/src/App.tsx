@@ -1,23 +1,25 @@
-import { useQuery } from "@apollo/client";
-import { USERS_QUERY } from "@/graphql/queries";
+import { useEffect, useState } from "react";
+import { Router } from "./router/router";
 
-const App = () => {
-  const { data, loading } = useQuery(USERS_QUERY);
+export const App = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(import.meta.env.VITE_BACKEND_URI_REFRESH, {
+      method: "POST",
+      credentials: "include",
+    }).then(async (x) => {
+      const { accessToken } = await x.json();
+
+      localStorage.setItem("token", accessToken);
+
+      setLoading(false);
+    });
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  const users = data?.users;
-
-  return (
-    <div className="bg-black text-white h-full flex items-center justify-center">
-      <div>
-        {users?.map((user) => (
-          <div key={user.id}>{user.email}</div>
-        ))}
-      </div>
-    </div>
-  );
+  return <Router />;
 };
-export default App;
