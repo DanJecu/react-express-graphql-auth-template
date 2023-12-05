@@ -16,16 +16,33 @@ import { sendRefreshToken } from "./config/sendRefreshToken";
 
 (async () => {
   const app = express();
-  app.use(cookieParser());
+
+  AppDataSource.initialize();
+
   const apolloServer = new ApolloServer<MyContext>({
     schema: await buildSchema({
       resolvers: [UserResolver],
     }),
   });
 
-  AppDataSource.initialize();
-
   await apolloServer.start();
+
+  app.use(
+    "/graphql",
+    cors<cors.CorsRequest>({
+      origin: process.env.CLIENT_ORIGIN,
+      credentials: true,
+    }),
+    express.json(),
+    expressMiddleware(apolloServer, {
+      context: async ({ req, res }: { req: Request; res: Response }) => ({
+        req,
+        res,
+      }),
+    })
+  );
+
+  app.use(cookieParser());
 
   app.post("/refresh_token", async (req, res) => {
     const token = req.cookies.jid;
@@ -50,18 +67,6 @@ import { sendRefreshToken } from "./config/sendRefreshToken";
     // Get new access token
     return res.send({ ok: true, accessToken: createAccessToken(user) });
   });
-
-  app.use(
-    "/graphql",
-    cors<cors.CorsRequest>(),
-    express.json(),
-    expressMiddleware(apolloServer, {
-      context: async ({ req, res }: { req: Request; res: Response }) => ({
-        req,
-        res,
-      }),
-    })
-  );
 
   app.listen({ port: 4000 }, () => {
     console.log("🚀 Server ready at: http://localhost:4000/graphql");

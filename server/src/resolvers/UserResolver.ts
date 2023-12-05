@@ -50,7 +50,7 @@ export class UserResolver {
 
   @Mutation(() => LoginResponse)
   async login(
-    @Arg("login") email: string,
+    @Arg("email") email: string,
     @Arg("password") password: string,
     @Ctx() { res }: MyContext
   ): Promise<LoginResponse> {
